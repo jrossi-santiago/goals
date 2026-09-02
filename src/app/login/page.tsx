@@ -4,11 +4,11 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-type Mode = "password" | "magic-link" | "sign-up";
+type Mode = "sign-in" | "sign-up";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [mode, setMode] = useState<Mode>("password");
+  const [mode, setMode] = useState<Mode>("sign-in");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "sent">("idle");
@@ -20,22 +20,8 @@ export default function LoginPage() {
     setStatus("loading");
     const supabase = createClient();
 
-    if (mode === "magic-link") {
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
-      });
-      if (error) {
-        setError(error.message);
-        setStatus("idle");
-      } else {
-        setStatus("sent");
-      }
-      return;
-    }
-
     if (mode === "sign-up") {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
@@ -43,6 +29,10 @@ export default function LoginPage() {
       if (error) {
         setError(error.message);
         setStatus("idle");
+      } else if (data.session) {
+        // Email confirmation is off — signed in immediately.
+        router.push("/home");
+        router.refresh();
       } else {
         setStatus("sent");
       }
@@ -72,13 +62,17 @@ export default function LoginPage() {
             <div className="animate-fade-in text-center text-sm">
               <p className="mb-1 font-medium">Check your email</p>
               <p className="text-ink-soft">
-                We sent a link to <span className="text-ink">{email}</span>.
+                Confirm your account via the link we sent to{" "}
+                <span className="text-ink">{email}</span>, then sign in.
               </p>
               <button
                 className="mt-4 text-sm text-accent underline underline-offset-2"
-                onClick={() => setStatus("idle")}
+                onClick={() => {
+                  setStatus("idle");
+                  setMode("sign-in");
+                }}
               >
-                Back
+                Back to sign in
               </button>
             </div>
           ) : (
@@ -95,22 +89,18 @@ export default function LoginPage() {
                 />
               </div>
 
-              {mode !== "magic-link" && (
-                <div>
-                  <label className="mb-1 block text-xs font-medium text-ink-soft">
-                    Password
-                  </label>
-                  <input
-                    type="password"
-                    required
-                    minLength={6}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full rounded-lg border border-line bg-paper px-3 py-2 text-sm outline-none focus:border-accent"
-                    placeholder="••••••••"
-                  />
-                </div>
-              )}
+              <div>
+                <label className="mb-1 block text-xs font-medium text-ink-soft">Password</label>
+                <input
+                  type="password"
+                  required
+                  minLength={6}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full rounded-lg border border-line bg-paper px-3 py-2 text-sm outline-none focus:border-accent"
+                  placeholder="••••••••"
+                />
+              </div>
 
               {error && <p className="text-xs text-red-600">{error}</p>}
 
@@ -123,43 +113,22 @@ export default function LoginPage() {
                   ? "Please wait…"
                   : mode === "sign-up"
                     ? "Create account"
-                    : mode === "magic-link"
-                      ? "Send magic link"
-                      : "Sign in"}
+                    : "Sign in"}
               </button>
 
-              <div className="flex items-center justify-between text-xs text-ink-soft">
-                {mode === "password" && (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() => setMode("magic-link")}
-                      className="underline underline-offset-2 hover:text-ink"
-                    >
-                      Use a magic link instead
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setMode("sign-up")}
-                      className="underline underline-offset-2 hover:text-ink"
-                    >
-                      Create account
-                    </button>
-                  </>
-                )}
-                {mode === "magic-link" && (
+              <div className="flex items-center justify-center text-xs text-ink-soft">
+                {mode === "sign-in" ? (
                   <button
                     type="button"
-                    onClick={() => setMode("password")}
+                    onClick={() => setMode("sign-up")}
                     className="underline underline-offset-2 hover:text-ink"
                   >
-                    Use a password instead
+                    Create account
                   </button>
-                )}
-                {mode === "sign-up" && (
+                ) : (
                   <button
                     type="button"
-                    onClick={() => setMode("password")}
+                    onClick={() => setMode("sign-in")}
                     className="underline underline-offset-2 hover:text-ink"
                   >
                     Already have an account? Sign in

@@ -18,7 +18,7 @@ Nothing here is a "life OS" — the four tabs are intentionally kept separate. V
    - A trigger that creates a `profiles` row automatically when someone signs up
    - The public `vision-images` Storage bucket, scoped per-user by folder (`storage.objects` policies)
 
-Since this is a single-user app, sign up once from the app's `/login` page (email + password, or a magic link) before continuing — the seed script needs a `auth.users` row to attach sample data to.
+Since this is a single-user app, sign up once from the app's `/login` page (email + password) before continuing — the seed script needs a `auth.users` row to attach sample data to.
 
 3. Optionally, run [`supabase/seed.sql`](./supabase/seed.sql) in the SQL editor to add a few sample goals, tasks, and events so the UI isn't empty. It automatically targets the first (only) user in the project.
 
@@ -28,7 +28,7 @@ By default Supabase requires email confirmation for new accounts. For a single-u
 - Confirm the email Supabase sends you, or
 - Turn off "Confirm email" under **Authentication → Providers → Email** for faster local setup.
 
-If you plan to use magic links or email confirmation, add `http://localhost:3000/auth/callback` (and your production URL's `/auth/callback`) to **Authentication → URL Configuration → Redirect URLs**.
+If you keep email confirmation on, add `http://localhost:3000/auth/callback` (and your production URL's `/auth/callback`) to **Authentication → URL Configuration → Redirect URLs**. Once signed in, the session cookie lasts 400 days and refreshes on every visit, so you won't be asked to sign in again on that device.
 
 ## 3. Configure environment variables
 
@@ -57,14 +57,14 @@ Open [http://localhost:3000](http://localhost:3000), sign up, and you'll land on
 1. Push this repo to GitHub.
 2. Import it into [Vercel](https://vercel.com/new).
 3. Add the same two environment variables (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`) in the Vercel project settings.
-4. Deploy. Add the deployed URL's `/auth/callback` to Supabase's redirect URL list if you use magic links.
+4. Deploy. Add the deployed URL's `/auth/callback` to Supabase's redirect URL list if email confirmation is on.
 
 ## Project structure
 
 ```
 src/app/(dashboard)/     Home, Vision, Goals, Board pages (behind auth via middleware.ts)
-src/app/login/           Sign in / sign up / magic link
-src/app/auth/            OAuth/magic-link callback + sign-out route
+src/app/login/           Sign in / sign up (email + password)
+src/app/auth/            Email-confirmation callback + sign-out route
 src/components/          One folder per tab, plus shared ui/
 src/lib/supabase/        Browser, server, and middleware Supabase clients
 supabase/schema.sql      Tables, RLS policies, storage bucket + policies
