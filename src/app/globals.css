@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+:root {
+  --paper: #faf8f4;
+  --paper-raised: #ffffff;
+  --ink: #2b2926;
+  --ink-soft: #6b6862;
+  --line: #e7e2d9;
+  --accent: #c96f4a;
+  --accent-soft: #f3e3da;
+  --business: #4f6f8f;
+  --business-soft: #e4ecf3;
+  --personal: #7a8f5c;
+  --personal-soft: #eaf0e0;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-paper-raised: var(--paper-raised);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-business: var(--business);
+  --color-business-soft: var(--business-soft);
+  --color-personal: var(--personal);
+  --color-personal-soft: var(--personal-soft);
+  --font-sans: var(--font-inter);
+  --font-hand: var(--font-caveat);
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+.card {
+  background: var(--paper-raised);
+  border: 1px solid var(--line);
+  border-radius: 0.9rem;
+  box-shadow: 0 1px 2px rgba(43, 41, 38, 0.04), 0 8px 20px -12px rgba(43, 41, 38, 0.12);
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 999px;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-in {
+  animation: fade-in 0.15s ease-out;
+}
