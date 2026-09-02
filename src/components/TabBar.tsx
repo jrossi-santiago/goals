@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 
 const TABS = [
   { href: "/home", label: "Home" },
@@ -68,12 +69,21 @@ export function TabBar() {
 }
 
 function SignOut() {
+  const router = useRouter();
+
+  async function handleSignOut() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/login");
+    router.refresh();
+  }
+
   return (
-    <Link
-      href="/auth/sign-out"
+    <button
+      onClick={handleSignOut}
       className="text-xs text-ink-soft underline underline-offset-2 hover:text-ink"
     >
       Sign out
-    </Link>
+    </button>
   );
 }
