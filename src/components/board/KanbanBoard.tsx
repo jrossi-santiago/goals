@@ -124,10 +124,12 @@ function Column({
   }
 
   return (
-    <div className="flex w-72 shrink-0 flex-col rounded-xl bg-black/[0.02] p-2">
-      <div className="mb-2 flex items-center justify-between px-1">
-        <h3 className="text-sm font-medium text-ink-soft">{label}</h3>
-        <span className="text-xs text-ink-soft/70">{tasks.length}</span>
+    <div className="flex w-72 shrink-0 flex-col rounded-2xl bg-black/[0.03] p-3">
+      <div className="mb-3 flex items-center justify-between px-1">
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-ink-soft">{label}</h3>
+        <span className="rounded-full bg-black/5 px-2 py-0.5 text-[11px] font-medium tabular-nums text-ink-soft">
+          {tasks.length}
+        </span>
       </div>
 
       <div ref={setNodeRef} className="flex min-h-[40px] flex-1 flex-col gap-2">
@@ -136,6 +138,11 @@ function Column({
             <SortableTaskCard key={task.id} task={task} onClick={() => onOpenTask(task)} />
           ))}
         </SortableContext>
+        {tasks.length === 0 && !adding && (
+          <div className="flex flex-1 min-h-16 items-center justify-center rounded-xl border border-dashed border-line text-xs text-ink-soft/60">
+            Drop a task here
+          </div>
+        )}
       </div>
 
       {adding ? (
@@ -193,19 +200,35 @@ function TaskCard({
       onClick={onClick}
       className={`card w-full cursor-grab p-3 text-left active:cursor-grabbing ${dragging ? "rotate-1 shadow-lg" : ""}`}
     >
-      <p className="text-sm font-medium leading-snug">{task.title}</p>
+      <TypeBadge type={task.type} />
+      <p className="mt-1.5 text-sm font-medium leading-snug">{task.title}</p>
       {task.notes && <p className="mt-1 line-clamp-2 text-xs text-ink-soft">{task.notes}</p>}
-      <div className="mt-2 flex items-center gap-2">
-        <TypeBadge type={task.type} />
-        {task.due_date && (
-          <span className="text-[11px] text-ink-soft">
-            {new Date(task.due_date + "T00:00:00").toLocaleDateString(undefined, {
-              month: "short",
-              day: "numeric",
-            })}
-          </span>
-        )}
-      </div>
+      {task.due_date && (
+        <div className="mt-2 flex items-center gap-1 text-[11px] text-ink-soft">
+          <CalendarIcon />
+          {new Date(task.due_date + "T00:00:00").toLocaleDateString(undefined, {
+            month: "short",
+            day: "numeric",
+          })}
+        </div>
+      )}
     </button>
+  );
+}
+
+function CalendarIcon() {
+  return (
+    <svg
+      width="12"
+      height="12"
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.4"
+      className="shrink-0"
+    >
+      <rect x="2" y="3" width="12" height="11" rx="1.5" />
+      <path d="M2 6.5h12M5 1.5v3M11 1.5v3" strokeLinecap="round" />
+    </svg>
   );
 }

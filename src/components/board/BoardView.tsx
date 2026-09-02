@@ -148,10 +148,7 @@ export function BoardView({
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-10">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="font-hand text-5xl italic text-ink">Board</h1>
-          <p className="text-sm text-ink-soft">Plan the week, then see it on the calendar.</p>
-        </div>
+        <p className="text-sm text-ink-soft">Plan the week, then see it on the calendar.</p>
         <div className="flex rounded-full border border-line p-0.5 text-sm">
           {(["kanban", "calendar"] as View[]).map((v) => (
             <button

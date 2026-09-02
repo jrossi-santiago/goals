@@ -181,10 +181,7 @@ export function VisionCanvas({
 
   return (
     <div className="relative flex h-[calc(100vh-56px)] flex-col sm:h-[calc(100vh-57px)]">
-      <div className="flex items-center justify-between border-b border-line px-4 py-3 sm:px-6">
-        <div>
-          <h1 className="font-hand text-5xl italic text-ink">Vision</h1>
-        </div>
+      <div className="flex items-center justify-end border-b border-line px-4 py-3 sm:px-6">
         <div className="flex items-center gap-2">
           <button
             onClick={() => addText("note")}
