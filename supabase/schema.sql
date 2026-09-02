@@ -48,7 +48,7 @@ create trigger on_auth_user_created
 -- ============================================================================
 create table if not exists public.vision_items (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users (id) on delete cascade,
+  user_id uuid not null default auth.uid() references auth.users (id) on delete cascade,
   type text not null check (type in ('image', 'text', 'note')),
   content text, -- title/body for text+note; caption for image (optional)
   image_path text, -- storage object path, for type='image'
@@ -79,7 +79,7 @@ create index if not exists vision_items_user_id_idx on public.vision_items (user
 -- ============================================================================
 create table if not exists public.goals (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users (id) on delete cascade,
+  user_id uuid not null default auth.uid() references auth.users (id) on delete cascade,
   title text not null,
   notes text,
   status text not null default 'active' check (status in ('active', 'paused', 'done')),
@@ -107,7 +107,7 @@ create index if not exists goals_user_id_idx on public.goals (user_id);
 -- ============================================================================
 create table if not exists public.tasks (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users (id) on delete cascade,
+  user_id uuid not null default auth.uid() references auth.users (id) on delete cascade,
   title text not null,
   notes text,
   type text not null default 'personal' check (type in ('personal', 'business')),
@@ -138,7 +138,7 @@ create index if not exists tasks_column_idx on public.tasks ("column");
 -- ============================================================================
 create table if not exists public.events (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users (id) on delete cascade,
+  user_id uuid not null default auth.uid() references auth.users (id) on delete cascade,
   title text not null,
   notes text,
   type text not null default 'personal' check (type in ('personal', 'business')),
