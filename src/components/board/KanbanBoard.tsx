@@ -146,7 +146,7 @@ function Column({
             onChange={(e) => setValue(e.target.value)}
             onBlur={submitAdd}
             placeholder="Task title…"
-            className="w-full rounded-lg border border-line bg-paper-raised px-2.5 py-1.5 text-sm outline-none focus:border-accent"
+            className="w-full rounded-lg border border-line bg-paper-raised px-2.5 py-1.5 text-sm outline-none focus:border-ink"
           />
         </form>
       ) : (

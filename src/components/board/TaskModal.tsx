@@ -51,7 +51,7 @@ export function TaskModal({
             autoFocus
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full rounded-lg border border-line bg-paper px-3 py-2 text-sm outline-none focus:border-accent"
+            className="w-full rounded-lg border border-line bg-paper px-3 py-2 text-sm outline-none focus:border-ink"
             placeholder="Book physio appointment"
           />
         </div>
@@ -62,7 +62,7 @@ export function TaskModal({
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={3}
-            className="w-full resize-none rounded-lg border border-line bg-paper px-3 py-2 text-sm outline-none focus:border-accent"
+            className="w-full resize-none rounded-lg border border-line bg-paper px-3 py-2 text-sm outline-none focus:border-ink"
             placeholder="Optional detail…"
           />
         </div>
@@ -73,7 +73,7 @@ export function TaskModal({
             <select
               value={type}
               onChange={(e) => setType(e.target.value as ItemType)}
-              className="w-full rounded-lg border border-line bg-paper px-3 py-2 text-sm outline-none focus:border-accent"
+              className="w-full rounded-lg border border-line bg-paper px-3 py-2 text-sm outline-none focus:border-ink"
             >
               <option value="personal">Personal</option>
               <option value="business">Business</option>
@@ -84,7 +84,7 @@ export function TaskModal({
             <select
               value={column}
               onChange={(e) => setColumn(e.target.value as KanbanColumn)}
-              className="w-full rounded-lg border border-line bg-paper px-3 py-2 text-sm outline-none focus:border-accent"
+              className="w-full rounded-lg border border-line bg-paper px-3 py-2 text-sm outline-none focus:border-ink"
             >
               {KANBAN_COLUMNS.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -103,7 +103,7 @@ export function TaskModal({
             type="date"
             value={dueDate ?? ""}
             onChange={(e) => setDueDate(e.target.value)}
-            className="w-full rounded-lg border border-line bg-paper px-3 py-2 text-sm outline-none focus:border-accent"
+            className="w-full rounded-lg border border-line bg-paper px-3 py-2 text-sm outline-none focus:border-ink"
           />
         </div>
 

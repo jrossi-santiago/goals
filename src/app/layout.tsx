@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Caveat } from "next/font/google";
+import { Inter, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
@@ -7,20 +7,24 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
-const caveat = Caveat({
-  variable: "--font-caveat",
+const serifDisplay = Instrument_Serif({
+  variable: "--font-serif-display",
   subsets: ["latin"],
-  weight: ["500", "700"],
+  weight: ["400"],
+  style: ["normal", "italic"],
 });
 
 export const metadata: Metadata = {
   title: "Board",
-  description: "A calm personal space for vision, goals, and plans.",
+  description: "A calm personal space for vision and plans.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${inter.variable} ${caveat.variable} h-full antialiased`}>
+    <html
+      lang="en"
+      className={`${inter.variable} ${serifDisplay.variable} h-full antialiased`}
+    >
       <body className="min-h-full flex flex-col bg-paper text-ink">{children}</body>
     </html>
   );

@@ -183,18 +183,18 @@ export function VisionCanvas({
     <div className="relative flex h-[calc(100vh-56px)] flex-col sm:h-[calc(100vh-57px)]">
       <div className="flex items-center justify-between border-b border-line px-4 py-3 sm:px-6">
         <div>
-          <h1 className="font-hand text-4xl text-accent">Vision</h1>
+          <h1 className="font-hand text-5xl italic text-ink">Vision</h1>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={() => addText("note")}
-            className="rounded-full border border-line px-3 py-1.5 text-sm hover:bg-accent-soft"
+            className="rounded-full border border-line px-3 py-1.5 text-sm hover:bg-black/5"
           >
             + Note
           </button>
           <button
             onClick={() => addText("text")}
-            className="rounded-full border border-line px-3 py-1.5 text-sm hover:bg-accent-soft"
+            className="rounded-full border border-line px-3 py-1.5 text-sm hover:bg-black/5"
           >
             + Text
           </button>
@@ -257,11 +257,11 @@ export function VisionCanvas({
       </div>
 
       <div className="absolute bottom-4 right-4 flex items-center gap-1 rounded-full border border-line bg-paper-raised px-1.5 py-1 shadow-sm">
-        <button onClick={() => zoomBy(-0.15)} className="h-7 w-7 rounded-full text-sm hover:bg-accent-soft">
+        <button onClick={() => zoomBy(-0.15)} className="h-7 w-7 rounded-full text-sm hover:bg-black/5">
           −
         </button>
         <span className="w-10 text-center text-xs text-ink-soft">{Math.round(view.zoom * 100)}%</span>
-        <button onClick={() => zoomBy(0.15)} className="h-7 w-7 rounded-full text-sm hover:bg-accent-soft">
+        <button onClick={() => zoomBy(0.15)} className="h-7 w-7 rounded-full text-sm hover:bg-black/5">
           +
         </button>
       </div>
@@ -342,7 +342,7 @@ function VisionCard({
         height: item.height,
         zIndex: item.z_index,
       }}
-      className={`absolute select-none ${selected ? "ring-2 ring-accent" : ""}`}
+      className={`absolute select-none ${selected ? "ring-2 ring-ink" : ""}`}
     >
       <div
         onPointerDown={onDragPointerDown}
@@ -385,7 +385,7 @@ function VisionCard({
               className={`h-full w-full whitespace-pre-wrap p-3 text-sm ${
                 item.type === "text"
                   ? "font-hand text-lg leading-snug text-ink"
-                  : "bg-[#fdf6da] text-ink"
+                  : "bg-[#f2f2ef] text-ink"
               }`}
             >
               {item.content || <span className="text-ink-soft">Double-tap to edit…</span>}

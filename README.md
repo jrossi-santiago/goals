@@ -1,8 +1,8 @@
 # Board
 
-A calm, single-user personal dashboard: **Home**, **Vision**, **Goals**, **Board** (Kanban + Calendar). Built with Next.js (App Router), Tailwind CSS, and Supabase (Auth, Postgres, Storage).
+A calm, single-user personal dashboard: **Vision** and **Board** (Kanban + Calendar). Built with Next.js (App Router), Tailwind CSS, and Supabase (Auth, Postgres, Storage).
 
-Nothing here is a "life OS" — the four tabs are intentionally kept separate. Vision is not linked to Goals; Goals are not linked to tasks. The Board tab (Kanban + Calendar) is the only pair of views that share data, and only because a task's due date naturally belongs on both.
+Nothing here is a "life OS." Vision is a freeform mood board with no links out to anything else. The Board tab's Kanban and Calendar views share the same task data (a task's due date naturally belongs on both), and that's the only data shared across the app.
 
 ## 1. Create a Supabase project
 
@@ -13,14 +13,14 @@ Nothing here is a "life OS" — the four tabs are intentionally kept separate. V
 
 1. Open the Supabase **SQL Editor**.
 2. Paste and run the contents of [`supabase/schema.sql`](./supabase/schema.sql). This creates:
-   - `profiles`, `vision_items`, `goals`, `tasks`, `events` tables
-   - Row Level Security policies so each user only ever sees their own rows
+   - `profiles`, `vision_items`, `tasks`, `events` tables (plus an unused `goals` table, kept for a possible future tab)
+   - Row Level Security policies so each user only ever sees their own rows, with `user_id` defaulting to the logged-in user automatically
    - A trigger that creates a `profiles` row automatically when someone signs up
    - The public `vision-images` Storage bucket, scoped per-user by folder (`storage.objects` policies)
 
 Since this is a single-user app, sign up once from the app's `/login` page (email + password) before continuing — the seed script needs a `auth.users` row to attach sample data to.
 
-3. Optionally, run [`supabase/seed.sql`](./supabase/seed.sql) in the SQL editor to add a few sample goals, tasks, and events so the UI isn't empty. It automatically targets the first (only) user in the project.
+3. Optionally, run [`supabase/seed.sql`](./supabase/seed.sql) in the SQL editor to add a few sample tasks and events so the UI isn't empty. It automatically targets the first (only) user in the project.
 
 ### Auth settings
 
@@ -50,7 +50,7 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000), sign up, and you'll land on Home.
+Open [http://localhost:3000](http://localhost:3000), sign up, and you'll land on Vision.
 
 ## 5. Deploy to Vercel
 
@@ -62,9 +62,9 @@ Open [http://localhost:3000](http://localhost:3000), sign up, and you'll land on
 ## Project structure
 
 ```
-src/app/(dashboard)/     Home, Vision, Goals, Board pages (behind auth via middleware.ts)
+src/app/(dashboard)/     Vision, Board pages (behind auth via middleware.ts)
 src/app/login/           Sign in / sign up (email + password)
-src/app/auth/            Email-confirmation callback + sign-out route
+src/app/auth/            Email-confirmation callback route
 src/components/          One folder per tab, plus shared ui/
 src/lib/supabase/        Browser, server, and middleware Supabase clients
 supabase/schema.sql      Tables, RLS policies, storage bucket + policies
@@ -73,4 +73,4 @@ supabase/seed.sql        Optional sample data
 
 ## What's intentionally not here
 
-Per the app's design, there's no AI, no collaboration/sharing, no comments, no Google Calendar sync, no habit tracker, no journal, no notifications, no public pages, and no linking between Vision, Goals, and tasks. Each tab does one job.
+There's no AI, no collaboration/sharing, no comments, no Google Calendar sync, no habit tracker, no journal, no notifications, and no public pages. Vision has no links out to Board — it's a mood board, nothing more.

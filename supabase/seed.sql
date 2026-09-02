@@ -9,18 +9,6 @@
 with me as (
   select id as user_id from auth.users order by created_at asc limit 1
 )
-insert into public.goals (user_id, title, notes, status, target_date, pinned)
-select user_id, 'Run a half marathon', 'Build up long runs on weekends. Target under 2:15.', 'active', current_date + interval '90 days', true from me
-union all
-select user_id, 'Read 12 books this year', 'Mix of fiction and non-fiction.', 'active', null, false from me
-union all
-select user_id, 'Learn to sail', 'Take a beginner course this summer.', 'paused', null, false from me
-union all
-select user_id, 'Repaint the living room', 'Sage green, already picked the swatch.', 'done', current_date - interval '10 days', false from me;
-
-with me as (
-  select id as user_id from auth.users order by created_at asc limit 1
-)
 insert into public.tasks (user_id, title, notes, type, "column", sort_order, due_date)
 select user_id, 'Book physio appointment', null, 'personal', 'this_week', 0, current_date + interval '2 days' from me
 union all

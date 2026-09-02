@@ -81,7 +81,7 @@ export function CalendarView({
         <div className="flex items-center gap-2">
           <button
             onClick={() => setCursor((c) => (mode === "month" ? subMonths(c, 1) : subWeeks(c, 1)))}
-            className="rounded-full border border-line px-2.5 py-1 text-sm hover:bg-accent-soft"
+            className="rounded-full border border-line px-2.5 py-1 text-sm hover:bg-black/5"
           >
             ←
           </button>
@@ -90,7 +90,7 @@ export function CalendarView({
           </h2>
           <button
             onClick={() => setCursor((c) => (mode === "month" ? addMonths(c, 1) : addWeeks(c, 1)))}
-            className="rounded-full border border-line px-2.5 py-1 text-sm hover:bg-accent-soft"
+            className="rounded-full border border-line px-2.5 py-1 text-sm hover:bg-black/5"
           >
             →
           </button>
@@ -174,13 +174,13 @@ function MonthGrid({
             onDragOver={(e) => e.preventDefault()}
             onDrop={(e) => onDropOnDay(day, e)}
             onClick={() => onAddEvent(format(day, "yyyy-MM-dd"))}
-            className={`min-h-24 cursor-pointer bg-paper-raised p-1.5 transition hover:bg-accent-soft/40 sm:min-h-28 ${
+            className={`min-h-24 cursor-pointer bg-paper-raised p-1.5 transition hover:bg-black/5/40 sm:min-h-28 ${
               inMonth ? "" : "opacity-40"
             }`}
           >
             <span
               className={`inline-flex h-5 w-5 items-center justify-center rounded-full text-xs ${
-                isToday ? "bg-accent text-white" : "text-ink-soft"
+                isToday ? "bg-ink text-paper" : "text-ink-soft"
               }`}
             >
               {format(day, "d")}
@@ -238,7 +238,7 @@ function WeekRow({
               <span className="text-xs font-medium text-ink-soft">{format(day, "EEE")}</span>
               <span
                 className={`inline-flex h-5 w-5 items-center justify-center rounded-full text-xs ${
-                  isToday ? "bg-accent text-white" : "text-ink-soft"
+                  isToday ? "bg-ink text-paper" : "text-ink-soft"
                 }`}
               >
                 {format(day, "d")}
@@ -281,7 +281,7 @@ function ItemPill({
         else onOpenEvent(item.event);
       }}
       className={`truncate rounded-md px-1.5 py-0.5 text-left text-[11px] leading-tight ${
-        type === "business" ? "bg-business-soft text-business" : "bg-personal-soft text-personal"
+        type === "business" ? "bg-ink text-paper" : "border border-ink/30 text-ink-soft"
       } ${draggable ? "cursor-grab active:cursor-grabbing" : ""}`}
       title={item.title}
     >

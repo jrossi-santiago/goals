@@ -5,7 +5,7 @@ export function TypeBadge({ type }: { type: ItemType }) {
   return (
     <span
       className={`rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide ${
-        isBusiness ? "bg-business-soft text-business" : "bg-personal-soft text-personal"
+        isBusiness ? "bg-ink text-paper" : "border border-ink/40 text-ink-soft"
       }`}
     >
       {isBusiness ? "Business" : "Personal"}

@@ -31,7 +31,7 @@ export default function LoginPage() {
         setStatus("idle");
       } else if (data.session) {
         // Email confirmation is off — signed in immediately.
-        router.push("/home");
+        router.push("/vision");
         router.refresh();
       } else {
         setStatus("sent");
@@ -44,7 +44,7 @@ export default function LoginPage() {
       setError(error.message);
       setStatus("idle");
     } else {
-      router.push("/home");
+      router.push("/vision");
       router.refresh();
     }
   }
@@ -53,7 +53,7 @@ export default function LoginPage() {
     <main className="flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <h1 className="font-hand text-5xl text-accent">Board</h1>
+          <h1 className="font-hand text-6xl italic text-ink">Board</h1>
           <p className="mt-2 text-sm text-ink-soft">A calm personal space.</p>
         </div>
 
@@ -66,7 +66,7 @@ export default function LoginPage() {
                 <span className="text-ink">{email}</span>, then sign in.
               </p>
               <button
-                className="mt-4 text-sm text-accent underline underline-offset-2"
+                className="mt-4 text-sm text-ink underline underline-offset-2"
                 onClick={() => {
                   setStatus("idle");
                   setMode("sign-in");
@@ -84,7 +84,7 @@ export default function LoginPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-lg border border-line bg-paper px-3 py-2 text-sm outline-none focus:border-accent"
+                  className="w-full rounded-lg border border-line bg-paper px-3 py-2 text-sm outline-none focus:border-ink"
                   placeholder="you@example.com"
                 />
               </div>
@@ -97,7 +97,7 @@ export default function LoginPage() {
                   minLength={6}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full rounded-lg border border-line bg-paper px-3 py-2 text-sm outline-none focus:border-accent"
+                  className="w-full rounded-lg border border-line bg-paper px-3 py-2 text-sm outline-none focus:border-ink"
                   placeholder="••••••••"
                 />
               </div>
