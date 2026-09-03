@@ -1,13 +1,15 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { VisionItem } from "@/types/database";
 
 export type VisionItemWithUrl = VisionItem & { imageUrl: string | null };
 
-const MIN_ZOOM = 0.4;
-const MAX_ZOOM = 2;
+const MIN_ZOOM = 0.2;
+const MAX_ZOOM = 2.5;
+const BOARD_WIDTH = 1440;
+const BOARD_HEIGHT = 960;
 
 export function VisionCanvas({
   initialItems,
@@ -26,8 +28,29 @@ export function VisionCanvas({
   const panState = useRef<{ startX: number; startY: number; viewX: number; viewY: number } | null>(
     null
   );
+  const pinchState = useRef<{
+    startDist: number;
+    startZoom: number;
+    startMidX: number;
+    startMidY: number;
+    startViewX: number;
+    startViewY: number;
+  } | null>(null);
+  const isPinchingRef = useRef(false);
 
   const maxZ = items.reduce((m, i) => Math.max(m, i.z_index), 0);
+
+  // Center the fixed-size board in whatever viewport we're given (phone or desktop) on first render.
+  useEffect(() => {
+    const el = viewportRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    setView((v) => ({
+      ...v,
+      x: (rect.width - BOARD_WIDTH * v.zoom) / 2,
+      y: (rect.height - BOARD_HEIGHT * v.zoom) / 2,
+    }));
+  }, []);
 
   const persist = useCallback(
     (id: string, patch: Partial<VisionItem>) => {
@@ -147,17 +170,34 @@ export function VisionCanvas({
     setSelectedId(data.id);
   }
 
-  // ---- Pan ----
+  // ---- Pan & zoom ----
+
+  // Keep the board point under (clientX, clientY) fixed on screen while zooming to nextZoomRaw.
+  function zoomAtPoint(nextZoomRaw: number, clientX: number, clientY: number) {
+    const el = viewportRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const nextZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, nextZoomRaw));
+    setView((v) => {
+      const localX = clientX - rect.left;
+      const localY = clientY - rect.top;
+      const boardX = (localX - v.x) / v.zoom;
+      const boardY = (localY - v.y) / v.zoom;
+      return { zoom: nextZoom, x: localX - boardX * nextZoom, y: localY - boardY * nextZoom };
+    });
+  }
 
   function onViewportPointerDown(e: React.PointerEvent) {
-    if (e.target !== e.currentTarget) return; // only pan when clicking empty canvas
+    if (pinchState.current) return;
+    // Cards stopPropagation() on their own pointerdown, so anything reaching
+    // here is a click on empty board (or off-board) space.
     setSelectedId(null);
-    (e.target as Element).setPointerCapture(e.pointerId);
+    e.currentTarget.setPointerCapture(e.pointerId);
     panState.current = { startX: e.clientX, startY: e.clientY, viewX: view.x, viewY: view.y };
   }
 
   function onViewportPointerMove(e: React.PointerEvent) {
-    if (!panState.current) return;
+    if (!panState.current || pinchState.current) return;
     const dx = e.clientX - panState.current.startX;
     const dy = e.clientY - panState.current.startY;
     setView((v) => ({ ...v, x: panState.current!.viewX + dx, y: panState.current!.viewY + dy }));
@@ -169,14 +209,70 @@ export function VisionCanvas({
 
   function onWheel(e: React.WheelEvent) {
     e.preventDefault();
-    setView((v) => {
-      const nextZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, v.zoom - e.deltaY * 0.001));
-      return { ...v, zoom: nextZoom };
-    });
+    zoomAtPoint(view.zoom - e.deltaY * 0.001, e.clientX, e.clientY);
   }
 
   function zoomBy(delta: number) {
-    setView((v) => ({ ...v, zoom: Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, v.zoom + delta)) }));
+    const el = viewportRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    zoomAtPoint(view.zoom + delta, rect.left + rect.width / 2, rect.top + rect.height / 2);
+  }
+
+  function fitToScreen() {
+    const el = viewportRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const zoom = Math.min(
+      MAX_ZOOM,
+      Math.max(MIN_ZOOM, Math.min(rect.width / BOARD_WIDTH, rect.height / BOARD_HEIGHT) * 0.94)
+    );
+    setView({ zoom, x: (rect.width - BOARD_WIDTH * zoom) / 2, y: (rect.height - BOARD_HEIGHT * zoom) / 2 });
+  }
+
+  // ---- Pinch to zoom (touch) ----
+
+  function onTouchStart(e: React.TouchEvent) {
+    if (e.touches.length === 2) {
+      panState.current = null;
+      isPinchingRef.current = true;
+      const [t1, t2] = [e.touches[0], e.touches[1]];
+      pinchState.current = {
+        startDist: Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY),
+        startZoom: view.zoom,
+        startMidX: (t1.clientX + t2.clientX) / 2,
+        startMidY: (t1.clientY + t2.clientY) / 2,
+        startViewX: view.x,
+        startViewY: view.y,
+      };
+    }
+  }
+
+  function onTouchMove(e: React.TouchEvent) {
+    const p = pinchState.current;
+    const el = viewportRef.current;
+    if (!p || !el || e.touches.length < 2) return;
+    const [t1, t2] = [e.touches[0], e.touches[1]];
+    const dist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+    const midX = (t1.clientX + t2.clientX) / 2;
+    const midY = (t1.clientY + t2.clientY) / 2;
+    const nextZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, p.startZoom * (dist / p.startDist)));
+
+    const rect = el.getBoundingClientRect();
+    const startLocalX = p.startMidX - rect.left;
+    const startLocalY = p.startMidY - rect.top;
+    const boardX = (startLocalX - p.startViewX) / p.startZoom;
+    const boardY = (startLocalY - p.startViewY) / p.startZoom;
+
+    const nowLocalX = midX - rect.left;
+    const nowLocalY = midY - rect.top;
+
+    setView({ zoom: nextZoom, x: nowLocalX - boardX * nextZoom, y: nowLocalY - boardY * nextZoom });
+  }
+
+  function onTouchEnd(e: React.TouchEvent) {
+    if (e.touches.length < 2) pinchState.current = null;
+    if (e.touches.length === 0) isPinchingRef.current = false;
   }
 
   return (
@@ -218,30 +314,37 @@ export function VisionCanvas({
         onPointerMove={onViewportPointerMove}
         onPointerUp={endPan}
         onPointerLeave={endPan}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        onTouchCancel={onTouchEnd}
         onWheel={onWheel}
-        className="relative flex-1 touch-none overflow-hidden bg-[radial-gradient(var(--line)_1px,transparent_1px)] [background-size:22px_22px]"
+        className="relative flex-1 touch-none overflow-hidden bg-black/[0.03]"
       >
-        {items.length === 0 && (
-          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-            <p className="font-hand text-2xl text-ink-soft">
-              An empty board. Add a photo, a quote, or a note.
-            </p>
-          </div>
-        )}
-
         <div
           style={{
+            width: BOARD_WIDTH,
+            height: BOARD_HEIGHT,
             transform: `translate(${view.x}px, ${view.y}px) scale(${view.zoom})`,
             transformOrigin: "0 0",
           }}
-          className="absolute left-0 top-0"
+          className="card absolute left-0 top-0 overflow-hidden bg-[radial-gradient(var(--line)_1px,transparent_1px)] [background-size:22px_22px]"
         >
+          {items.length === 0 && (
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+              <p className="font-hand text-2xl text-ink-soft">
+                An empty board. Add a photo, a quote, or a note.
+              </p>
+            </div>
+          )}
+
           {items.map((item) => (
             <VisionCard
               key={item.id}
               item={item}
               selected={selectedId === item.id}
               zoom={view.zoom}
+              isPinchingRef={isPinchingRef}
               onSelect={() => {
                 setSelectedId(item.id);
                 bringToFront(item.id);
@@ -254,6 +357,14 @@ export function VisionCanvas({
       </div>
 
       <div className="absolute bottom-4 right-4 flex items-center gap-1 rounded-full border border-line bg-paper-raised px-1.5 py-1 shadow-sm">
+        <button
+          onClick={fitToScreen}
+          className="rounded-full px-2 h-7 text-xs hover:bg-black/5"
+          aria-label="Fit board to screen"
+        >
+          Fit
+        </button>
+        <div className="mx-0.5 h-4 w-px bg-line" />
         <button onClick={() => zoomBy(-0.15)} className="h-7 w-7 rounded-full text-sm hover:bg-black/5">
           −
         </button>
@@ -270,6 +381,7 @@ function VisionCard({
   item,
   selected,
   zoom,
+  isPinchingRef,
   onSelect,
   onUpdate,
   onDelete,
@@ -277,6 +389,7 @@ function VisionCard({
   item: VisionItemWithUrl;
   selected: boolean;
   zoom: number;
+  isPinchingRef: React.RefObject<boolean>;
   onSelect: () => void;
   onUpdate: (patch: Partial<VisionItemWithUrl>, opts?: { persist?: boolean }) => void;
   onDelete: () => void;
@@ -293,7 +406,7 @@ function VisionCard({
   }
 
   function onDragPointerMove(e: React.PointerEvent) {
-    if (!dragState.current) return;
+    if (!dragState.current || isPinchingRef.current) return;
     const dx = (e.clientX - dragState.current.startX) / zoom;
     const dy = (e.clientY - dragState.current.startY) / zoom;
     onUpdate({ x: dragState.current.x + dx, y: dragState.current.y + dy }, { persist: false });
@@ -312,7 +425,7 @@ function VisionCard({
   }
 
   function onResizePointerMove(e: React.PointerEvent) {
-    if (!resizeState.current) return;
+    if (!resizeState.current || isPinchingRef.current) return;
     const dx = (e.clientX - resizeState.current.startX) / zoom;
     const dy = (e.clientY - resizeState.current.startY) / zoom;
     onUpdate(
